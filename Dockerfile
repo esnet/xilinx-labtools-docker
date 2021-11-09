@@ -38,6 +38,7 @@ RUN \
 ARG DISPENSE_BASE_URL="http://dispense.es.net/Linux/xilinx"
 
 # Install the Xilinx Lab tools
+# Xilinx installer tar file originally from: https://www.xilinx.com/support/download.html
 ARG VIVADO_LAB_INSTALLER="Xilinx_Vivado_Lab_Lin_2021.1_0610_2318.tar.gz"
 ARG VIVADO_LAB_CONFIG="install_config_lab2021.txt"
 COPY $VIVADO_LAB_CONFIG /vivado-installer/
