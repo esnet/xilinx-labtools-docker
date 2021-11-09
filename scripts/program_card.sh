@@ -2,18 +2,33 @@
 
 function usage() {
     echo ""
-    echo "Usage: $(basename $0) <bitfile_path> [FORCE]"
+    echo "Usage: $(basename $0) <hw_server_url> <hw_target_serial> <bitfile_path> [FORCE]"
+    echo "  hw_server_url: host:port for xilinx hw_server (e.g. xilinx-hwserver:3121)"
+    echo "  hw_target_serial: serial number of serial JTAG device (e.g. 21770205K01Y)"
+    echo "     can be discovered with: lsusb -v -d 0403:6011 | grep iSerial"
+    echo "     can be set to '*' to select the first serial JTAG device that is found"
     echo "  bitfile_path: full path to the .bit file to be loaded into the fpga"
     echo "  FORCE: optionally force a reload even if the USERCODE/UserID fields match"
     echo ""
 }
 
-# Make sure the caller has provided a bitfile path
-if [ "$#" -lt 1 ] ; then
-    echo "ERROR: Missing <bitfile_path> parameter which is required."
+# Make sure the caller has provided the required parameters
+if [ "$#" -lt 3 ] ; then
+    echo "ERROR: Missing required parameter(s)"
     usage
     exit 1
 fi
+
+# Grab URL pointing to the xilinx hw_server
+echo "Using Xilinx hw_server URL: $1"
+HW_SERVER_URL=$1
+shift
+
+# Grab the serial number for the USB-JTAG cable so that
+# we can differentiate among them in case we have many
+echo "Using USB-JTAG cable with serial: $1"
+HW_TARGET_SERIAL=$1
+shift
 
 # Make sure the bitfile exists and is readable
 if [ ! -e $1 ] ; then
@@ -54,7 +69,7 @@ if [ "$#" -gt 0 ] ; then
 fi
 
 # First, check if we are already running the correct FPGA version
-/usr/local/bin/check_fpga_version.sh $BITFILE_PATH
+/usr/local/bin/check_fpga_version.sh "$HW_SERVER_URL" "$HW_TARGET_SERIAL" "$BITFILE_PATH"
 FPGA_VERSION_OK=$?
 
 if [[ $FORCE -eq 0 && $FPGA_VERSION_OK -eq 0 ]] ; then
@@ -81,14 +96,14 @@ else
 	-notrace \
         -quiet \
 	-source /opt/Xilinx/tcl/program_card.tcl \
-	-tclargs $BITFILE_PATH
+	-tclargs "$HW_SERVER_URL" "$HW_TARGET_SERIAL" "$BITFILE_PATH"
     if [ $? -ne 0 ] ; then
 	echo "Failed to load FPGA, bailing out"
 	exit 1
     fi
 
     # Re-check if we have all expected devices on the bus now
-    /usr/local/bin/check_fpga_version.sh $BITFILE_PATH
+    /usr/local/bin/check_fpga_version.sh "$HW_SERVER_URL" "$HW_TARGET_SERIAL" "$BITFILE_PATH"
     FPGA_VERSION_OK=$?
     if [ $FPGA_VERSION_OK -eq 0 ] ; then
 	echo "Running and Target FPGA versions match"
