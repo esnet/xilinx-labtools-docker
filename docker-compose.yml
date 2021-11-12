@@ -1,0 +1,20 @@
+services:
+  xilinx-hwserver:
+    container_name: xilinx-hwserver
+    hostname: xilinx-hwserver
+    image: xilinx-labtools:v2021.1
+    build:
+      context: .
+    init: true
+    privileged: true
+    ports:
+      - "3121:3121"
+      - "1534:1534"
+    volumes:
+      - /dev:/dev
+      - /sys/bus/usb:/sys/bus/usb
+    entrypoint:
+      - /opt/Xilinx/Vivado_Lab/2021.1/bin/hw_server
+      - -S
+      - -s
+      - tcp::3121
