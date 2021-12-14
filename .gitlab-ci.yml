@@ -3,9 +3,6 @@ image: docker:20.10.10
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERT_DIR: ""
-  ESNET_REGISTRY: "hub.es.net:5000"
-  RELEASE_BRANCH: "main"
-  LATEST_TAG: $ESNET_REGISTRY/$CI_PROJECT_NAME:latest
   INTERNAL_IMAGE_TAG: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA
 
 services:
@@ -20,45 +17,58 @@ default:
   tags:
     - ht-docker
 
+container_scanning:
+  variables:
+    TRIVY_TIMEOUT: "1h"
+
 include:
   - project: 'security/container-scanning'
     file: '.ESnet-container-scan.yml'
 
 build:
   stage: build
-  variables:
-    GIT_SUBMODULE_STRATEGY: recursive
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
     - docker build --pull -t $INTERNAL_IMAGE_TAG .
     - docker push $INTERNAL_IMAGE_TAG
   timeout: 2h
 
-.push:
+hub_release:
   stage: push
+  variables:
+    PUBLISH_TAG: hub.es.net:5000/$CI_PROJECT_NAME:$CI_COMMIT_TAG
+    GIT_STRATEGY: none
   script:
+    # Auth and pull the image from gitlab
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
     - docker pull $INTERNAL_IMAGE_TAG
+
+    # Tag the image for release
     - docker tag $INTERNAL_IMAGE_TAG $PUBLISH_TAG
+
+    # Push to external registry
     - docker push $PUBLISH_TAG
-    - if [ "${PUBLISH_LATEST}" == "true" ]; then docker tag $INTERNAL_IMAGE_TAG $LATEST_TAG && docker push $LATEST_TAG; fi
   timeout: 2h
-
-internal_release:
-  extends:
-    - .push
   rules:
     - if: $CI_COMMIT_TAG
-  variables:
-    PUBLISH_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
-    GIT_STRATEGY: none
 
-external_release:
-  extends:
-    - .push
+wharf_release:
+  stage: push
+  variables:
+    # example PUBLISH_TAG: wharf.es.net/ht/xilinx-labtools-docker:v2021.2-1
+    PUBLISH_TAG: $HSITE/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_TAG
+    GIT_STRATEGY: none
+  script:
+    # Auth and pull the image from gitlab
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - docker pull $INTERNAL_IMAGE_TAG
+
+    # Tag the image for release
+    - docker tag $INTERNAL_IMAGE_TAG $PUBLISH_TAG
+
+    # Auth and push to external registry
+    - docker login -u "$HUSER" -p "$HTOKEN" "$HSITE"
+    - docker push $PUBLISH_TAG
+  timeout: 2h
   rules:
     - if: $CI_COMMIT_TAG
-  variables:
-    PUBLISH_TAG: $ESNET_REGISTRY/$CI_PROJECT_NAME:$CI_COMMIT_TAG
-    GIT_STRATEGY: none
-
