@@ -10,23 +10,22 @@ RUN \
   apt-get update -y && \
   apt-get upgrade -y && \
   apt-get install -y --no-install-recommends \
-    wget \
+    g++ \
+    graphviz \
+    lib32gcc-7-dev \
     libtinfo-dev \
+    libtinfo5 \
+    libxi6 \
     libxrender1 \
     libxtst6 \
-    x11-apps \
-    libxi6 \
-    lib32gcc-7-dev \
+    locales \
+    lsb-release \
     net-tools \
-    graphviz \
     unzip \
-    g++ \
-    libtinfo5 \
+    wget \
+    x11-apps \
     x11-utils \
     xvfb \
-    unzip \
-    lsb-release \
-    locales \
     && \
   apt-get autoclean && \
   apt-get autoremove && \
@@ -56,7 +55,7 @@ RUN \
   rm -rf /vivado-installer
 
 # Install log4j patch on top of the install
-ARG VIVADO_LAB_PATCH="Patch-Log4j-2.2.zip"
+ARG VIVADO_LAB_PATCH="Patch-Log4j-2.3.zip"
 COPY vivado-installer/ /vivado-installer/
 RUN \
   ( \
