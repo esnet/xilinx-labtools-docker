@@ -36,7 +36,8 @@ build:
 hub_release:
   stage: push
   variables:
-    PUBLISH_TAG: hub.es.net:5000/$CI_PROJECT_NAME:$CI_COMMIT_TAG
+    # example PUBLISH_TAG: hub.es.net:5000/xilinx-labtools-docker:18106-g1b221f5c
+    PUBLISH_TAG: hub.es.net:5000/$CI_PROJECT_NAME:$CI_PIPELINE_ID-g$CI_COMMIT_SHORT_SHA
     GIT_STRATEGY: none
   script:
     # Auth and pull the image from gitlab
@@ -44,19 +45,24 @@ hub_release:
     - docker pull $INTERNAL_IMAGE_TAG
 
     # Tag the image for release
-    - docker tag $INTERNAL_IMAGE_TAG $PUBLISH_TAG
+    - docker tag $INTERNAL_IMAGE_TAG $PUBLISH_TAG$TAG_SUFFIX
 
     # Push to external registry
-    - docker push $PUBLISH_TAG
+    - docker push $PUBLISH_TAG$TAG_SUFFIX
   timeout: 2h
   rules:
-    - if: $CI_COMMIT_TAG
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH'
+      when: manual
+      allow_failure: true
+      variables:
+        TAG_SUFFIX: -dev
 
 wharf_release:
   stage: push
   variables:
-    # example PUBLISH_TAG: wharf.es.net/ht/xilinx-labtools-docker:v2021.2-1
-    PUBLISH_TAG: $HSITE/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_TAG
+    # example PUBLISH_TAG: wharf.es.net/ht/xilinx-labtools-docker:18106-g1b221f5c
+    PUBLISH_TAG: $HSITE/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_PIPELINE_ID-g$CI_COMMIT_SHORT_SHA
     GIT_STRATEGY: none
   script:
     # Auth and pull the image from gitlab
@@ -64,11 +70,16 @@ wharf_release:
     - docker pull $INTERNAL_IMAGE_TAG
 
     # Tag the image for release
-    - docker tag $INTERNAL_IMAGE_TAG $PUBLISH_TAG
+    - docker tag $INTERNAL_IMAGE_TAG $PUBLISH_TAG$TAG_SUFFIX
 
     # Auth and push to external registry
     - docker login -u "$HUSER" -p "$HTOKEN" "$HSITE"
-    - docker push $PUBLISH_TAG
+    - docker push $PUBLISH_TAG$TAG_SUFFIX
   timeout: 2h
   rules:
-    - if: $CI_COMMIT_TAG
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH'
+      when: manual
+      allow_failure: true
+      variables:
+        TAG_SUFFIX: -dev
