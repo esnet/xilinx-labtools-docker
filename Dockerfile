@@ -74,4 +74,20 @@ RUN \
   rm -rf /opt/Xilinx/log4j_patch && \
   rm -rf /vivado-installer
 
+# Install misc extra packages that are useful at runtime but not required for installing labtools
+RUN \
+  ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime && \
+  apt-get update -y && \
+  apt-get upgrade -y && \
+  apt-get install -y --no-install-recommends \
+    file \
+    jq \
+    pciutils \
+    && \
+  apt-get autoclean && \
+  apt-get autoremove && \
+  locale-gen en_US.UTF-8 && \
+  update-locale LANG=en_US.UTF-8 && \
+  rm -rf /var/lib/apt/lists/*
+
 CMD ["/bin/bash", "-l"]
