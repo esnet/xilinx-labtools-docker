@@ -37,8 +37,10 @@ RUN \
 ARG DISPENSE_BASE_URL="http://dispense.es.net/Linux/xilinx"
 
 # Install the Xilinx Lab tools
+# ENV var to help users to find the version of vivado that has been installed in this container
+ENV VIVADO_VERSION=2021.2
 # Xilinx installer tar file originally from: https://www.xilinx.com/support/download.html
-ARG VIVADO_LAB_INSTALLER="Xilinx_Vivado_Lab_Lin_2021.2_1021_0703.tar.gz"
+ARG VIVADO_LAB_INSTALLER="Xilinx_Vivado_Lab_Lin_${VIVADO_VERSION}_1021_0703.tar.gz"
 COPY vivado-installer/ /vivado-installer/
 RUN \
   ( \
@@ -66,10 +68,26 @@ RUN \
   ) && \
   ( \
     cd /opt/Xilinx && \
-    export LD_LIBRARY_PATH=/opt/Xilinx/Vivado_Lab/2021.2/tps/lnx64/python-3.8.3/lib && \
-    ./Vivado_Lab/2021.2/tps/lnx64/python-3.8.3/bin/python log4j_patch/patch.py ; \
+    export LD_LIBRARY_PATH=/opt/Xilinx/Vivado_Lab/${VIVADO_VERSION}/tps/lnx64/python-3.8.3/lib && \
+    ./Vivado_Lab/${VIVADO_VERSION}/tps/lnx64/python-3.8.3/bin/python log4j_patch/patch.py ; \
   ) && \
   rm -rf /opt/Xilinx/log4j_patch && \
   rm -rf /vivado-installer
+
+# Install misc extra packages that are useful at runtime but not required for installing labtools
+RUN \
+  ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime && \
+  apt-get update -y && \
+  apt-get upgrade -y && \
+  apt-get install -y --no-install-recommends \
+    file \
+    jq \
+    pciutils \
+    && \
+  apt-get autoclean && \
+  apt-get autoremove && \
+  locale-gen en_US.UTF-8 && \
+  update-locale LANG=en_US.UTF-8 && \
+  rm -rf /var/lib/apt/lists/*
 
 CMD ["/bin/bash", "-l"]

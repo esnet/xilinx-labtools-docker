@@ -2,7 +2,7 @@ services:
   xilinx-hwserver:
     container_name: xilinx-hwserver
     hostname: xilinx-hwserver
-    image: xilinx-labtools:v2021.2
+    image: xilinx-labtools-docker:v2021.2-latest
     build:
       context: .
     init: true
@@ -14,7 +14,14 @@ services:
       - /dev:/dev
       - /sys/bus/usb:/sys/bus/usb
     entrypoint:
-      - /opt/Xilinx/Vivado_Lab/2021.2/bin/hw_server
-      - -S
-      - -s
-      - tcp::3121
+      - /bin/bash
+      - -c
+      - -e
+      - -o
+      - pipefail
+      - -x
+      - |
+        /opt/Xilinx/Vivado_Lab/$${VIVADO_VERSION}/bin/hw_server \
+          -S \
+          -s \
+          tcp::3121
