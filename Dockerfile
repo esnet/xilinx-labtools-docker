@@ -77,7 +77,6 @@ RUN \
 
 # Install misc extra packages that are useful at runtime but not required for installing labtools
 RUN \
-  ln -fs /usr/share/zoneinfo/UTC /etc/localtime && \
   apt-get update -y && \
   apt-get upgrade -y && \
   apt-get install -y --no-install-recommends \
@@ -87,8 +86,6 @@ RUN \
     && \
   apt-get autoclean && \
   apt-get autoremove && \
-  locale-gen en_US.UTF-8 && \
-  update-locale LANG=en_US.UTF-8 && \
   rm -rf /var/lib/apt/lists/*
 
 CMD ["/bin/bash", "-l"]
