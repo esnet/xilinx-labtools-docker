@@ -57,24 +57,6 @@ RUN \
     --config /vivado-installer/install_config_lab2021.txt && \
   rm -rf /vivado-installer
 
-# Install log4j patch on top of the install
-ARG VIVADO_LAB_PATCH="Patch-Log4j-2.5.zip"
-COPY vivado-installer/ /vivado-installer/
-RUN \
-  ( \
-    if [ ! -e /vivado-installer/$VIVADO_LAB_PATCH ] ; then \
-      wget -q --directory-prefix=/vivado-installer $DISPENSE_BASE_URL/$VIVADO_LAB_PATCH ; \
-    fi ; \
-    unzip -d /opt/Xilinx /vivado-installer/$VIVADO_LAB_PATCH ; \
-  ) && \
-  ( \
-    cd /opt/Xilinx && \
-    export LD_LIBRARY_PATH=/opt/Xilinx/Vivado_Lab/${VIVADO_VERSION}/tps/lnx64/python-3.8.3/lib && \
-    ./Vivado_Lab/${VIVADO_VERSION}/tps/lnx64/python-3.8.3/bin/python log4j_patch/patch.py ; \
-  ) && \
-  rm -rf /opt/Xilinx/log4j_patch && \
-  rm -rf /vivado-installer
-
 # Install misc extra packages that are useful at runtime but not required for installing labtools
 RUN \
   apt-get update -y && \
