@@ -6,7 +6,7 @@ COPY sources.list /etc/apt/sources.list
 
 # Install packages required for running the vivado installer
 RUN \
-  ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime && \
+  ln -fs /usr/share/zoneinfo/UTC /etc/localtime && \
   apt-get update -y && \
   apt-get upgrade -y && \
   apt-get install -y --no-install-recommends \
@@ -76,7 +76,7 @@ RUN \
 
 # Install misc extra packages that are useful at runtime but not required for installing labtools
 RUN \
-  ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime && \
+  ln -fs /usr/share/zoneinfo/UTC /etc/localtime && \
   apt-get update -y && \
   apt-get upgrade -y && \
   apt-get install -y --no-install-recommends \
