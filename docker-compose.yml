@@ -2,7 +2,7 @@ services:
   xilinx-hwserver:
     container_name: xilinx-hwserver
     hostname: xilinx-hwserver
-    image: xilinx-labtools-docker:v2021.2-latest
+    image: xilinx-labtools-docker:v2022.1-latest
     build:
       context: .
     init: true
