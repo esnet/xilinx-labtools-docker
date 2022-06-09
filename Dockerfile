@@ -6,10 +6,11 @@ COPY sources.list /etc/apt/sources.list
 
 # Install packages required for running the vivado installer
 RUN \
-  ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime && \
+  ln -fs /usr/share/zoneinfo/UTC /etc/localtime && \
   apt-get update -y && \
   apt-get upgrade -y && \
   apt-get install -y --no-install-recommends \
+    ca-certificates \
     g++ \
     graphviz \
     lib32gcc-7-dev \
@@ -34,7 +35,7 @@ RUN \
   rm -rf /var/lib/apt/lists/*
 
 # Set up the base address for where our installer binaries are stored
-ARG DISPENSE_BASE_URL="http://dispense.es.net/Linux/xilinx"
+ARG DISPENSE_BASE_URL="https://dispense.es.net/Linux/xilinx"
 
 # Install the Xilinx Lab tools
 # ENV var to help users to find the version of vivado that has been installed in this container
@@ -76,7 +77,6 @@ RUN \
 
 # Install misc extra packages that are useful at runtime but not required for installing labtools
 RUN \
-  ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime && \
   apt-get update -y && \
   apt-get upgrade -y && \
   apt-get install -y --no-install-recommends \
@@ -86,8 +86,6 @@ RUN \
     && \
   apt-get autoclean && \
   apt-get autoremove && \
-  locale-gen en_US.UTF-8 && \
-  update-locale LANG=en_US.UTF-8 && \
   rm -rf /var/lib/apt/lists/*
 
 CMD ["/bin/bash", "-l"]
