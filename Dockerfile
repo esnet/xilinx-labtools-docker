@@ -39,9 +39,9 @@ ARG DISPENSE_BASE_URL="https://dispense.es.net/Linux/xilinx"
 
 # Install the Xilinx Lab tools
 # ENV var to help users to find the version of vivado that has been installed in this container
-ENV VIVADO_VERSION=2021.2
+ENV VIVADO_VERSION=2022.1
 # Xilinx installer tar file originally from: https://www.xilinx.com/support/download.html
-ARG VIVADO_LAB_INSTALLER="Xilinx_Vivado_Lab_Lin_${VIVADO_VERSION}_1021_0703.tar.gz"
+ARG VIVADO_LAB_INSTALLER="Xilinx_Vivado_Lab_Lin_${VIVADO_VERSION}_0420_0327.tar.gz"
 COPY vivado-installer/ /vivado-installer/
 RUN \
   ( \
@@ -54,25 +54,7 @@ RUN \
   /vivado-installer/xsetup \
     --agree 3rdPartyEULA,XilinxEULA \
     --batch Install \
-    --config /vivado-installer/install_config_lab2021.txt && \
-  rm -rf /vivado-installer
-
-# Install log4j patch on top of the install
-ARG VIVADO_LAB_PATCH="Patch-Log4j-2.5.zip"
-COPY vivado-installer/ /vivado-installer/
-RUN \
-  ( \
-    if [ ! -e /vivado-installer/$VIVADO_LAB_PATCH ] ; then \
-      wget -q --directory-prefix=/vivado-installer $DISPENSE_BASE_URL/$VIVADO_LAB_PATCH ; \
-    fi ; \
-    unzip -d /opt/Xilinx /vivado-installer/$VIVADO_LAB_PATCH ; \
-  ) && \
-  ( \
-    cd /opt/Xilinx && \
-    export LD_LIBRARY_PATH=/opt/Xilinx/Vivado_Lab/${VIVADO_VERSION}/tps/lnx64/python-3.8.3/lib && \
-    ./Vivado_Lab/${VIVADO_VERSION}/tps/lnx64/python-3.8.3/bin/python log4j_patch/patch.py ; \
-  ) && \
-  rm -rf /opt/Xilinx/log4j_patch && \
+    --config /vivado-installer/install_config_lab2022.txt && \
   rm -rf /vivado-installer
 
 # Install misc extra packages that are useful at runtime but not required for installing labtools
