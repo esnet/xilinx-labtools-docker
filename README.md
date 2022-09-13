@@ -3,14 +3,14 @@ Download the Xilinx Labtools Installer
 --------------------------------------
 
 * Open a web browser to this page: https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vivado-design-tools/2022-1.html
-* Download `Vivado 2022.1: Lab Edition - Linux`
-* Save the file as exactly: `Xilinx_Vivado_Lab_Lin_2022.1_0420_0327.tar.gz`
+* Under the `Vivado Lab Solutions - 2022.1` section
+  * Download `Vivado 2022.1: Lab Edition - Linux`
+  * Save the file as exactly: `Xilinx_Vivado_Lab_Lin_2022.1_0420_0327.tar.gz`
 * Move the file into the `vivado-installer` directory in this repo
 
 ```
 $ tree
 .
-├── docker-compose.yml
 ├── Dockerfile
 ├── sources.list
 └── vivado-installer
@@ -18,11 +18,11 @@ $ tree
     └── Xilinx_Vivado_Lab_Lin_2022.1_0420_0327.tar.gz   <------- put the installer here
 ```
 
-Building the labtools container
--------------------------------
+Building the xilinx-labtools container
+--------------------------------------
 
 ```
-docker compose build
+docker build --pull -t xilinx-labtools-docker:v2022.1-latest .
 docker image ls
 ```
 
