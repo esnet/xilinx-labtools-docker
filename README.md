@@ -54,8 +54,8 @@ Building the xilinx-labtools container
 --------------------------------------
 
 ```
-docker build --pull -t xilinx-labtools-docker:v2022.1-latest .
+docker build --pull -t xilinx-labtools-docker:${USER}-dev .
 docker image ls
 ```
 
-You should see an image called `xilinx-labtools-docker` with tag `v2022.1-latest`.
+You should see an image called `xilinx-labtools-docker` with tag `${USER}-dev`.
