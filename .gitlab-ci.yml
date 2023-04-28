@@ -1,26 +1,3 @@
-image: docker:20.10.21
-
-variables:
-  DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERT_DIR: ""
-  INTERNAL_IMAGE_TAG: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA
-
-services:
-  - docker:20.10.21-dind
-
-stages:
-  - build
-  - test
-  - push
-
-default:
-  tags:
-    - ht-docker
-
-container_scanning:
-  variables:
-    TRIVY_TIMEOUT: "1h"
-
 include:
   - template: 'Workflows/Branch-Pipelines.gitlab-ci.yml'
   - project: 'security/container-scanning'
@@ -28,34 +5,44 @@ include:
 
 build:
   stage: build
-  script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build --pull -t $INTERNAL_IMAGE_TAG .
-    - docker push $INTERNAL_IMAGE_TAG
-  timeout: 2h
-
-wharf_release:
-  stage: push
+  image: docker:20.10.21
+  services:
+    - docker:20.10.21-dind
+  tags:
+    - ht-docker
   variables:
     # example PUBLISH_TAG: wharf.es.net/ht/xilinx-labtools-docker:18106-g1b221f5c
     PUBLISH_TAG: $HSITE/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_PIPELINE_ID-g$CI_COMMIT_SHORT_SHA
-    GIT_STRATEGY: none
   script:
-    # Auth and pull the image from gitlab
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker pull $INTERNAL_IMAGE_TAG
-
-    # Tag the image for release
-    - docker tag $INTERNAL_IMAGE_TAG $PUBLISH_TAG$TAG_SUFFIX
-
-    # Auth and push to external registry
+    # Auth to external registry
     - docker login -u "$HUSER" -p "$HTOKEN" "$HSITE"
+    # Build and push
+    - docker build --pull -t $PUBLISH_TAG$TAG_SUFFIX .
     - docker push $PUBLISH_TAG$TAG_SUFFIX
+    # Capture the published tag for downstream CI jobs
+    - |
+      cat <<EOF >> build.env
+      CS_IMAGE=$PUBLISH_TAG$TAG_SUFFIX
+      EOF
+    - cat build.env
   timeout: 2h
+  artifacts:
+    reports:
+      dotenv:
+        build.env
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH'
-      when: manual
-      allow_failure: true
       variables:
         TAG_SUFFIX: -dev
+
+container_scanning:
+  variables:
+    CS_REGISTRY_USER: $HUSER_RO
+    CS_REGISTRY_PASSWORD: $HTOKEN_RO
+    TRIVY_TIMEOUT: "1h"
+  # use 'dependencies' here rather than 'needs' since the gitlab container scanning
+  # include sets 'dependencies: []' which takes precedence over 'needs'
+  dependencies:
+    - build
+
