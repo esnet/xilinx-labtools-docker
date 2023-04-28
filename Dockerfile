@@ -1,12 +1,56 @@
+# First, build the xrt tools separately so we can drop most of the build-time dependencies
+FROM ubuntu:focal as xrt
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Configure local ubuntu mirror as package source
+COPY sources.list /etc/apt/sources.list
+
+# Build xrt tools (all of this just to get xbflash2...)
+RUN \
+  apt-get update -y && \
+  apt-get upgrade -y && \
+  apt install -y --no-install-recommends \
+    ca-certificates \
+    git
+RUN git clone https://github.com/xilinx/xrt.git
+RUN \
+  cd xrt && \
+  ./src/runtime_src/tools/scripts/xrtdeps.sh -docker && \
+  cd build && \
+  ./build.sh && \
+  echo 'apt install ./Release/xrt_*-xbflash2.deb' && \
+  cd / && \
+  mkdir /xrt-debs && \
+  cp -a /xrt/build/Release/*.deb /xrt-debs && \
+  rm -rf /xrt && \
+  apt-get autoclean && \
+  apt-get autoremove && \
+  rm -rf /var/lib/apt/lists/*
+
 FROM ubuntu:focal
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
 COPY sources.list /etc/apt/sources.list
 
+# Set our container localtime to UTC
+RUN \
+  ln -fs /usr/share/zoneinfo/UTC /etc/localtime
+
+# Install the previously built xbflash2 package
+COPY --from=xrt /xrt-debs/ /xrt-debs/
+RUN \
+  apt-get update -y && \
+  apt-get upgrade -y && \
+  apt-get install -y --no-install-recommends \
+    /xrt-debs/xrt_*-xbflash2.deb \
+    && \
+  apt-get autoclean && \
+  apt-get autoremove && \
+  rm -rf /var/lib/apt/lists/*
+
 # Install packages required for running the vivado installer
 RUN \
-  ln -fs /usr/share/zoneinfo/UTC /etc/localtime && \
   apt-get update -y && \
   apt-get upgrade -y && \
   apt-get install -y --no-install-recommends \
@@ -74,5 +118,9 @@ RUN \
   apt-get autoclean && \
   apt-get autoremove && \
   rm -rf /var/lib/apt/lists/*
+
+# Set up the container to pre-source the vivado environment
+COPY ./entrypoint.sh /entrypoint.sh
+ENTRYPOINT [ "/entrypoint.sh" ]
 
 CMD ["/bin/bash", "-l"]
