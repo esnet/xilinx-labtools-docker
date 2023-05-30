@@ -3,7 +3,7 @@ FROM ubuntu:focal as xrt
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
-COPY sources.list /etc/apt/sources.list
+COPY sources.list.focal /etc/apt/sources.list
 
 # Build xrt tools (all of this just to get xbflash2...)
 RUN \
@@ -31,7 +31,7 @@ FROM ubuntu:focal
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
-COPY sources.list /etc/apt/sources.list
+COPY sources.list.focal /etc/apt/sources.list
 
 # Set our container localtime to UTC
 RUN \
