@@ -66,6 +66,7 @@ RUN \
     locales \
     lsb-release \
     net-tools \
+    pigz \
     unzip \
     wget \
     x11-apps \
@@ -95,9 +96,9 @@ COPY vivado-installer/ /vivado-installer/
 RUN \
   ( \
     if [ -e /vivado-installer/$VIVADO_LAB_INSTALLER ] ; then \
-      tar zxf /vivado-installer/$VIVADO_LAB_INSTALLER --strip-components=1 -C /vivado-installer ; \
+      pigz -dc /vivado-installer/$VIVADO_LAB_INSTALLER | tar xa --strip-components=1 -C /vivado-installer ; \
     else \
-      wget -qO- $DISPENSE_BASE_URL/$VIVADO_LAB_INSTALLER | tar zx --strip-components=1 -C /vivado-installer ; \
+      wget -qO- $DISPENSE_BASE_URL/$VIVADO_LAB_INSTALLER | pigz -dc | tar xa --strip-components=1 -C /vivado-installer ; \
     fi \
   ) && \
   /vivado-installer/xsetup \
