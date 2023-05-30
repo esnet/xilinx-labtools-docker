@@ -102,6 +102,17 @@ RUN \
       wget -qO- $DISPENSE_BASE_URL/$VIVADO_LAB_INSTALLER | pigz -dc | tar xa --strip-components=1 -C /vivado-installer ; \
     fi \
   ) && \
+  if [ ! -e /vivado-installer/install_config_lab.${VIVADO_VERSION}.txt ] ; then \
+    /vivado-installer/xsetup \
+      -l /tools/Xilinx \
+      -e 'Vivado Lab Edition (Standalone)' \
+      -b ConfigGen && \
+    echo "No installer configuration file was provided.  Generating a default one for you to modify." && \
+    echo "-------------" && \
+    cat /root/.Xilinx/install_config.txt && \
+    echo "-------------" && \
+    exit 1 ; \
+  fi ; \
   /vivado-installer/xsetup \
     --agree 3rdPartyEULA,XilinxEULA \
     --batch Install \
