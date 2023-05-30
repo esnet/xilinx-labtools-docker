@@ -104,7 +104,7 @@ RUN \
   /vivado-installer/xsetup \
     --agree 3rdPartyEULA,XilinxEULA \
     --batch Install \
-    --config /vivado-installer/install_config_lab2022.txt && \
+    --config /vivado-installer/install_config_lab.${VIVADO_VERSION}.txt && \
   rm -rf /vivado-installer
 
 # Install misc extra packages that are useful at runtime but not required for installing labtools
