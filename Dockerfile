@@ -83,6 +83,8 @@ ARG DISPENSE_BASE_URL="https://dispense.es.net/Linux/xilinx"
 ENV VIVADO_VERSION=2023.1
 # Xilinx installer tar file originally from: https://www.xilinx.com/support/download.html
 ARG VIVADO_LAB_INSTALLER="Xilinx_Vivado_Lab_Lin_${VIVADO_VERSION}_0507_1903.tar.gz"
+# Installer config file
+ARG VIVADO_INSTALLER_CONFIG="/vivado-installer/install_config_lab.${VIVADO_VERSION}.txt"
 
 COPY vivado-installer/ /vivado-installer/
 RUN \
@@ -93,9 +95,8 @@ RUN \
       wget -qO- $DISPENSE_BASE_URL/$VIVADO_LAB_INSTALLER | pigz -dc | tar xa --strip-components=1 -C /vivado-installer ; \
     fi \
   ) && \
-  if [ ! -e /vivado-installer/install_config_lab.${VIVADO_VERSION}.txt ] ; then \
+  if [ ! -e ${VIVADO_INSTALLER_CONFIG} ] ; then \
     /vivado-installer/xsetup \
-      -l /tools/Xilinx \
       -e 'Vivado Lab Edition (Standalone)' \
       -b ConfigGen && \
     echo "No installer configuration file was provided.  Generating a default one for you to modify." && \
@@ -107,7 +108,7 @@ RUN \
   /vivado-installer/xsetup \
     --agree 3rdPartyEULA,XilinxEULA \
     --batch Install \
-    --config /vivado-installer/install_config_lab.${VIVADO_VERSION}.txt && \
+    --config ${VIVADO_INSTALLER_CONFIG} && \
   rm -rf /vivado-installer
 
 # Apply post-install patches to fix issues found on each OS release
