@@ -3,7 +3,7 @@ FROM ubuntu:focal as xrt
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
-COPY sources.list /etc/apt/sources.list
+COPY sources.list.focal /etc/apt/sources.list
 
 # Build xrt tools (all of this just to get xbflash2...)
 RUN \
@@ -31,7 +31,7 @@ FROM ubuntu:focal
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
-COPY sources.list /etc/apt/sources.list
+COPY sources.list.focal /etc/apt/sources.list
 
 # Set our container localtime to UTC
 RUN \
@@ -55,22 +55,14 @@ RUN \
   apt-get upgrade -y && \
   apt-get install -y --no-install-recommends \
     ca-certificates \
-    g++ \
-    graphviz \
-    lib32gcc-7-dev \
-    libtinfo-dev \
     libtinfo5 \
-    libxi6 \
-    libxrender1 \
-    libxtst6 \
     locales \
     lsb-release \
     net-tools \
+    patch \
+    pigz \
     unzip \
     wget \
-    x11-apps \
-    x11-utils \
-    xvfb \
     && \
   apt-get autoclean && \
   apt-get autoremove && \
@@ -88,23 +80,50 @@ ARG DISPENSE_BASE_URL="https://dispense.es.net/Linux/xilinx"
 
 # Install the Xilinx Lab tools
 # ENV var to help users to find the version of vivado that has been installed in this container
-ENV VIVADO_VERSION=2022.1
+ENV VIVADO_VERSION=2023.1
 # Xilinx installer tar file originally from: https://www.xilinx.com/support/download.html
-ARG VIVADO_LAB_INSTALLER="Xilinx_Vivado_Lab_Lin_${VIVADO_VERSION}_0420_0327.tar.gz"
+ARG VIVADO_LAB_INSTALLER="Xilinx_Vivado_Lab_Lin_${VIVADO_VERSION}_0507_1903.tar.gz"
+# Installer config file
+ARG VIVADO_INSTALLER_CONFIG="/vivado-installer/install_config_lab.${VIVADO_VERSION}.txt"
+
 COPY vivado-installer/ /vivado-installer/
 RUN \
   ( \
     if [ -e /vivado-installer/$VIVADO_LAB_INSTALLER ] ; then \
-      tar zxf /vivado-installer/$VIVADO_LAB_INSTALLER --strip-components=1 -C /vivado-installer ; \
+      pigz -dc /vivado-installer/$VIVADO_LAB_INSTALLER | tar xa --strip-components=1 -C /vivado-installer ; \
     else \
-      wget -qO- $DISPENSE_BASE_URL/$VIVADO_LAB_INSTALLER | tar zx --strip-components=1 -C /vivado-installer ; \
+      wget -qO- $DISPENSE_BASE_URL/$VIVADO_LAB_INSTALLER | pigz -dc | tar xa --strip-components=1 -C /vivado-installer ; \
     fi \
   ) && \
+  if [ ! -e ${VIVADO_INSTALLER_CONFIG} ] ; then \
+    /vivado-installer/xsetup \
+      -e 'Vivado Lab Edition (Standalone)' \
+      -b ConfigGen && \
+    echo "No installer configuration file was provided.  Generating a default one for you to modify." && \
+    echo "-------------" && \
+    cat /root/.Xilinx/install_config.txt && \
+    echo "-------------" && \
+    exit 1 ; \
+  fi ; \
   /vivado-installer/xsetup \
     --agree 3rdPartyEULA,XilinxEULA \
     --batch Install \
-    --config /vivado-installer/install_config_lab2022.txt && \
+    --config ${VIVADO_INSTALLER_CONFIG} && \
   rm -rf /vivado-installer
+
+# Apply post-install patches to fix issues found on each OS release
+# Common patches
+#   * Disable workaround for X11 XSupportsLocale bug.  This workaround triggers additional requirements on the host
+#     to have an entire suite of X11 related libraries installed even though we only use vivado in batch/tcl mode.
+#     See: https://support.xilinx.com/s/article/62553?language=en_US
+COPY patches/ /patches
+RUN \
+  if [ -e "/patches/ubuntu-$(lsb_release --short --release)-vivado-${VIVADO_VERSION}-postinstall.patch" ] ; then \
+    patch -p 1 < /patches/ubuntu-$(lsb_release --short --release)-vivado-${VIVADO_VERSION}-postinstall.patch ; \
+  fi ; \
+  if [ -e "/patches/vivado-${VIVADO_VERSION}-postinstall.patch" ] ; then \
+    patch -p 1 < /patches/vivado-${VIVADO_VERSION}-postinstall.patch ; \
+  fi
 
 # Install misc extra packages that are useful at runtime but not required for installing labtools
 RUN \

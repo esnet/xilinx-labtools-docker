@@ -1,8 +1,8 @@
 #### Vivado Lab Edition (Standalone) Install Configuration ####
 Edition=Vivado Lab Edition (Standalone)
 
-# Path where Xilinx software will be installed.
-Destination=/opt/Xilinx
+# Path where AMD FPGAs & Adaptive SoCs software will be installed.
+Destination=/tools/Xilinx
 
 # Choose the Products/Devices the you would like to install.
 Modules=UpdateMEM:0
