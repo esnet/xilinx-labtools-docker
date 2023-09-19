@@ -40,10 +40,30 @@ Download the Xilinx Labtools Installer
   * Save the file as exactly: `Xilinx_Vivado_Lab_Lin_2023.1_0507_1903.tar.gz`
 * Move the file into the `vivado-installer` directory in this repo
 
+Download the Alveo Smartnic Satellite Controller Update Tool
+------------------------------------------------------------
+* Open a web browser to this page: https://support.xilinx.com/s/article/73654
+* At the bottom of the page under the `Files` section
+  * Download `loadsc_v2.3.zip`
+  * Save the file as exactly `loadsc_v2.3.zip`
+* Move the file into the `sc-fw-downloads` directory in this repo
+
+Verify that you have the downloaded files all in the right places
+-----------------------------------------------------------------
+
+This is a map of where the downloaded files should be placed
 ```
 $ tree
 .
 ├── Dockerfile
+├── entrypoint.sh
+├── LICENSE.md
+├── patches
+│   └── vivado-2023.1-postinstall.patch
+├── README.md
+├── sc-fw-downloads
+│   └── loadsc_v2.3.zip   <------------------------------------- put the zip file here
+├── sc-fw-extra
 ├── sources.list.focal
 └── vivado-installer
     ├── install_config_lab.2023.1.txt
