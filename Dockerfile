@@ -85,7 +85,7 @@ RUN \
   cd xrt && \
   ./src/runtime_src/tools/scripts/xrtdeps.sh -docker && \
   cd build && \
-  ./build.sh && \
+  ./build.sh -noert && \
   echo 'apt install ./Release/xrt_*-xbflash2.deb' && \
   cd / && \
   mkdir /xrt-debs && \
