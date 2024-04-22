@@ -20,6 +20,7 @@ build:
   before_script:
     # Download optional assets from dispense which are not directly available on xilinx.com
     - wget -q -P sc-fw-extra https://dispense.es.net/Linux/xilinx/sc-fw-u280-4.3.15-e7c874dfed8b39991ece9606f14bcc55.txt
+    - wget -q -P sc-fw-extra https://dispense.es.net/Linux/xilinx/sc-fw-u280-4.3.30-1f2b1b241938e582e1e6540c949cb477.txt
   script:
     # Auth to external registry
     - docker login -u "$HUSER" -p "$HTOKEN" "$HSITE"
