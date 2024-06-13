@@ -1,23 +1,39 @@
 # -- --- ----- ------- ----------- -------------
 
-# Set up firmware tools and images for the Alveo Card Satellite Controller
-FROM ubuntu:focal as sc-fw
+# Set up the Xilinx Debian package archive and download some pre-built packages
+FROM ubuntu:focal as xilinx
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
 COPY sources.list.focal /etc/apt/sources.list
 
-# Build the loadsc tool found in this Xilinx KB article
-#   https://support.xilinx.com/s/article/73654?language=en_US
+# Install prereq tools
 RUN \
   apt-get update -y && \
   apt-get upgrade -y && \
   apt install -y --no-install-recommends \
     build-essential \
     ca-certificates \
-    dpkg \
+    gnupg2 \
+    lsb-release \
     unzip \
     wget
+
+# Import the Xilinx public key
+RUN wget -qO - https://www.xilinx.com/support/download/2020-2/xilinx-master-signing-key.asc | apt-key add -
+# Add the Xilinx debian archive
+RUN echo "deb https://packages.xilinx.com/artifactory/debian-packages $(lsb_release -cs) main" | tee -a /etc/apt/sources.list.d/xlnx.list
+RUN apt update
+
+# Download the latest versions of the Satellite Controller Firmware (SC FW) packages and xbflash2 tool from the Xilinx archive
+RUN \
+  mkdir --mode ugo=rwx /xilinx-debs && \
+  cd /xilinx-debs && \
+  apt download \
+    xilinx-sc-fw-u280 \
+    xilinx-sc-fw-u55 \
+    xrt-xbflash2
+RUN ls -l /xilinx-debs
 
 # Prepare an output directory to hold the outputs from this build stage
 RUN mkdir -p /sc-fw
@@ -45,55 +61,14 @@ RUN \
   cd /sc-fw-downloads/loadsc && \
   gcc -o /sc-fw/loadsc *.c
 
-# Download and extract a few versions of the Satellite Controller firmware packages
-#   https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/alveo.html
-ARG SC_FW_BASE_URL="https://www.xilinx.com/bin/public/openDownload?filename="
-ARG SC_FW_U280_PKGS="xilinx-u280-gen3x16-xdma_2023.1_2023_0507_2220-all.deb.tar.gz xilinx-u280-gen3x16-xdma_2022.1_2022_0804_1110-all.deb.tar.gz"
-ARG SC_FW_U55C_PKGS="xilinx-u55c-gen3x16-xdma_2023.1_2023_0507_2220-all.deb.tar.gz xilinx-u55c-gen3x16-xdma_2022.1_2022_0415_2123-all.deb.tar.gz"
+# Extract the SC firmware files into a common location
 RUN \
-  cd /sc-fw-downloads && \
-  for f in $SC_FW_U280_PKGS $SC_FW_U55C_PKGS ; do \
-    echo "Fetching: $SC_FW_BASE_URL$f" ; \
-    wget -qO- "$SC_FW_BASE_URL$f" | tar xz --wildcards 'xilinx-sc-fw*.deb' ; \
-  done ; \
-  mkdir -p /sc-fw && \
-  for sc in /sc-fw-downloads/xilinx-sc-fw*.deb ; do \
+  for sc in /xilinx-debs/xilinx-sc-fw*.deb ; do \
     dpkg-deb --fsys-tarfile "$sc" | tar x -C /sc-fw --strip-components 6 --wildcards './opt/xilinx/firmware/sc-fw/*/sc-fw-*.txt' ; \
   done
 
 # Copy in any locally populated extra SC firmware images supplied by the user
 COPY sc-fw-extra/ /sc-fw/
-
-# -- --- ----- ------- ----------- -------------
-
-# Build the xrt tools separately so we can drop most of the build-time dependencies
-FROM ubuntu:focal as xrt
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Configure local ubuntu mirror as package source
-COPY sources.list.focal /etc/apt/sources.list
-
-# Build xrt tools (all of this just to get xbflash2...)
-RUN \
-  apt-get update -y && \
-  apt-get upgrade -y && \
-  apt install -y --no-install-recommends \
-    ca-certificates \
-    git
-RUN git clone https://github.com/xilinx/xrt.git
-RUN \
-  cd xrt && \
-  ./src/runtime_src/tools/scripts/xrtdeps.sh -docker && \
-  cd build && \
-  ./build.sh -noert && \
-  echo 'apt install ./Release/xrt_*-xbflash2.deb' && \
-  cd / && \
-  mkdir /xrt-debs && \
-  cp -a /xrt/build/Release/*.deb /xrt-debs && \
-  rm -rf /xrt && \
-  apt-get autoclean && \
-  apt-get autoremove && \
-  rm -rf /var/lib/apt/lists/*
 
 # -- --- ----- ------- ----------- -------------
 
@@ -107,16 +82,18 @@ COPY sources.list.focal /etc/apt/sources.list
 RUN \
   ln -fs /usr/share/zoneinfo/UTC /etc/localtime
 
-# Pull in the extracted SC firmware images and the loadsc tool from the loadsc layer
-COPY --from=sc-fw /sc-fw/ /sc-fw/
+# Pull in the downloaded deb files from the xilinx layer
+COPY --from=xilinx /xilinx-debs/ /xilinx-debs/
 
-# Install the previously built xbflash2 package
-COPY --from=xrt /xrt-debs/ /xrt-debs/
+# Pull in the extracted SC firmware files from the xilinx layer
+COPY --from=xilinx /sc-fw/ /sc-fw/
+
+# Install the xbflash2 package
 RUN \
   apt-get update -y && \
   apt-get upgrade -y && \
   apt-get install -y --no-install-recommends \
-    /xrt-debs/xrt_*-xbflash2.deb \
+    /xilinx-debs/xrt-xbflash2_*_amd64.deb \
     && \
   apt-get autoclean && \
   apt-get autoremove && \
