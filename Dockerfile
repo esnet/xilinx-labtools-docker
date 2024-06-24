@@ -1,7 +1,7 @@
 # -- --- ----- ------- ----------- -------------
 
 # Set up the Xilinx Debian package archive and download some pre-built packages
-FROM ubuntu:focal as xilinx
+FROM ubuntu:jammy as xilinx
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
@@ -73,7 +73,7 @@ COPY sc-fw-extra/ /sc-fw/
 
 # -- --- ----- ------- ----------- -------------
 
-FROM ubuntu:focal
+FROM ubuntu:jammy
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
