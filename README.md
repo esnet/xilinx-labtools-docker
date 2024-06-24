@@ -64,7 +64,6 @@ $ tree
 ├── sc-fw-downloads
 │   └── loadsc_v2.3.zip   <------------------------------------- put the zip file here
 ├── sc-fw-extra
-├── sources.list.focal
 └── vivado-installer
     ├── install_config_lab.2023.2.txt
     └── Vivado_Lab_Lin_2023.2_1013_2256.tar.gz          <------- put the installer here

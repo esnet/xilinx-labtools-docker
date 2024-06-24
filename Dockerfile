@@ -5,7 +5,8 @@ FROM ubuntu:focal as xilinx
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
-COPY sources.list.focal /etc/apt/sources.list
+RUN \
+  sed -i -re 's|(http://)([^/]+.*)/|\1linux.mirrors.es.net/ubuntu|g' /etc/apt/sources.list
 
 # Install prereq tools
 RUN \
@@ -76,7 +77,8 @@ FROM ubuntu:focal
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
-COPY sources.list.focal /etc/apt/sources.list
+RUN \
+  sed -i -re 's|(http://)([^/]+.*)/|\1linux.mirrors.es.net/ubuntu|g' /etc/apt/sources.list
 
 # Set our container localtime to UTC
 RUN \
