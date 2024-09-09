@@ -42,7 +42,7 @@ Download the Xilinx Labtools Installer
 
 Download the Alveo Smartnic Satellite Controller Update Tool
 ------------------------------------------------------------
-* Open a web browser to this page: https://support.xilinx.com/s/article/73654
+* Open a web browser to this page: https://adaptivesupport.amd.com/s/article/73654
 * At the bottom of the page under the `Files` section
   * Download `loadsc_v2.3.zip`
   * Save the file as exactly `loadsc_v2.3.zip`
