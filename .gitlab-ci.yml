@@ -38,6 +38,8 @@ build:
       CS_IMAGE=$PUBLISH_TAG$TAG_SUFFIX
       EOF
     - cat build.env
+    - |
+      echo Image published as: $PUBLISH_TAG$TAG_SUFFIX
   timeout: 2h
   artifacts:
     reports:
