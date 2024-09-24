@@ -70,6 +70,10 @@ RUN \
 
 # Copy in any locally populated extra SC firmware images supplied by the user
 COPY sc-fw-extra/ /sc-fw/
+RUN \
+  for sc in /sc-fw-downloads/SC_*.zip ; do \
+    unzip -d /sc-fw $sc ; \
+  done
 
 # -- --- ----- ------- ----------- -------------
 
