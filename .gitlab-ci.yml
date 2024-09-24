@@ -26,6 +26,7 @@ build:
     - wget -q -P sc-fw-extra https://dispense.es.net/Linux/xilinx/sc-fw-u280-4.3.27-86ad998ebd4a64a737957f4bc8fd9cbc.txt
     - wget -q -P sc-fw-extra https://dispense.es.net/Linux/xilinx/sc-fw-u280-4.3.31-3df2cd43aeeee780f6bd16547d47a0d4.txt
     - wget -q -P sc-fw-extra https://dispense.es.net/Linux/xilinx/sc-fw-u55-7.1.17-fb6d693b58a437cc186916fce5fa13bd.txt
+    - wget -q -P sc-fw-extra https://dispense.es.net/Linux/xilinx/sc-fw-u55-7.1.23-53c604b35fd124c316ce1b477ab75689.txt
   script:
     # Auth to external registry
     - docker login -u "$HUSER" -p "$HTOKEN" "$HSITE"
