@@ -2,15 +2,18 @@ include:
   - template: 'Workflows/Branch-Pipelines.gitlab-ci.yml'
   - project: 'security/container-scanning'
     file: '.ESnet-container-scan.yml'
-  - project: 'ht/cicd-common'
-    ref: 'main'
-    file: 'harbor-cve.yml'
+  - component: $CI_SERVER_FQDN/ht/cicd-common/harbor-cve@main
+    inputs:
+      harbor_host:    $HSITE
+      harbor_user:    $HUSER_CVE
+      harbor_token:   $HTOKEN_CVE
+      harbor_project: $CI_PROJECT_NAMESPACE
 
 build:
   stage: build
-  image: docker:20.10.21
+  image: docker:26.1
   services:
-    - docker:20.10.21-dind
+    - docker:26.1-dind
   tags:
     - ht-docker
   variables:
@@ -23,6 +26,10 @@ build:
     - wget -q -P sc-fw-extra https://dispense.es.net/Linux/xilinx/sc-fw-u280-4.3.27-86ad998ebd4a64a737957f4bc8fd9cbc.txt
     - wget -q -P sc-fw-extra https://dispense.es.net/Linux/xilinx/sc-fw-u280-4.3.31-3df2cd43aeeee780f6bd16547d47a0d4.txt
     - wget -q -P sc-fw-extra https://dispense.es.net/Linux/xilinx/sc-fw-u55-7.1.17-fb6d693b58a437cc186916fce5fa13bd.txt
+    - wget -q -P sc-fw-extra https://dispense.es.net/Linux/xilinx/sc-fw-u55-7.1.23-53c604b35fd124c316ce1b477ab75689.txt
+    # Download optional assets from dispense which match the files that external users would download manually
+    - wget -q -P sc-fw-downloads https://dispense.es.net/Linux/xilinx/SC_U280_4_3_31.zip
+    - wget -q -P sc-fw-downloads https://dispense.es.net/Linux/xilinx/SC_U55C_7_1_23.zip
   script:
     # Auth to external registry
     - docker login -u "$HUSER" -p "$HTOKEN" "$HSITE"
@@ -35,6 +42,8 @@ build:
       CS_IMAGE=$PUBLISH_TAG$TAG_SUFFIX
       EOF
     - cat build.env
+    - |
+      echo Image published as: $PUBLISH_TAG$TAG_SUFFIX
   timeout: 2h
   artifacts:
     reports:

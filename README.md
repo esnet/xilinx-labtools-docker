@@ -48,6 +48,16 @@ Download the Alveo Smartnic Satellite Controller Update Tool
   * Save the file as exactly `loadsc_v2.3.zip`
 * Move the file into the `sc-fw-downloads` directory in this repo
 
+Download the latest Satellite Controller Firmware Releases (optional)
+---------------------------------------------------------------------
+* Open a web browser to this page: https://adaptivesupport.amd.com/s/article/Alveo-Custom-Flow-Latest-CMS-IP-and-SC-FW
+* At the bottom of the page under the `Files` section
+  * Download `SC_U280_4_3_31.zip`
+    * Save the file as exactly `SC_U280_4_3_31.zip`
+  * Download `SC_U55C_7_1_23.zip`
+    * Save the file as exactly `SC_U55C_7_1_23.zip`
+  * Move the downloaded files into the `sc-fw-downloads` directory in this repo
+
 Verify that you have the downloaded files all in the right places
 -----------------------------------------------------------------
 
@@ -62,9 +72,10 @@ $ tree
 │   └── vivado-2023.2-postinstall.patch
 ├── README.md
 ├── sc-fw-downloads
-│   └── loadsc_v2.3.zip   <------------------------------------- put the zip file here
+│   ├── loadsc_v2.3.zip   <------------------------------------- put the loadsc zip file here
+│   ├── SC_U280_4_3_31.zip   <---------------------------------- put the SC Firmware zip files here
+│   └── SC_U55_7_1_23.zip    <---------------------------------- put the SC Firmware zip files here
 ├── sc-fw-extra
-├── sources.list.focal
 └── vivado-installer
     ├── install_config_lab.2023.2.txt
     └── Vivado_Lab_Lin_2023.2_1013_2256.tar.gz          <------- put the installer here

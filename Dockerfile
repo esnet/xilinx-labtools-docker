@@ -1,11 +1,12 @@
 # -- --- ----- ------- ----------- -------------
 
 # Set up the Xilinx Debian package archive and download some pre-built packages
-FROM ubuntu:focal as xilinx
+FROM ubuntu:jammy as xilinx
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
-COPY sources.list.focal /etc/apt/sources.list
+RUN \
+  sed -i -re 's|(http://)([^/]+.*)/|\1linux.mirrors.es.net/ubuntu|g' /etc/apt/sources.list
 
 # Install prereq tools
 RUN \
@@ -69,14 +70,19 @@ RUN \
 
 # Copy in any locally populated extra SC firmware images supplied by the user
 COPY sc-fw-extra/ /sc-fw/
+RUN \
+  for sc in /sc-fw-downloads/SC_*.zip ; do \
+    unzip -d /sc-fw $sc ; \
+  done
 
 # -- --- ----- ------- ----------- -------------
 
-FROM ubuntu:focal
+FROM ubuntu:jammy
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
-COPY sources.list.focal /etc/apt/sources.list
+RUN \
+  sed -i -re 's|(http://)([^/]+.*)/|\1linux.mirrors.es.net/ubuntu|g' /etc/apt/sources.list
 
 # Set our container localtime to UTC
 RUN \
