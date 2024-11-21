@@ -118,7 +118,6 @@ RUN \
     lsb-release \
     net-tools \
     patch \
-    pigz \
     unzip \
     wget \
     && \
@@ -148,9 +147,9 @@ COPY vivado-installer/ /vivado-installer/
 RUN \
   ( \
     if [ -e /vivado-installer/$VIVADO_LAB_INSTALLER ] ; then \
-      pigz -dc /vivado-installer/$VIVADO_LAB_INSTALLER | tar xa --strip-components=1 -C /vivado-installer ; \
+      tar xf /vivado-installer/$VIVADO_LAB_INSTALLER --strip-components=1 -C /vivado-installer ; \
     else \
-      wget -qO- $DISPENSE_BASE_URL/$VIVADO_LAB_INSTALLER | pigz -dc | tar xa --strip-components=1 -C /vivado-installer ; \
+      wget -qO- $DISPENSE_BASE_URL/$VIVADO_LAB_INSTALLER | tar x --strip-components=1 -C /vivado-installer ; \
     fi \
   )
 
