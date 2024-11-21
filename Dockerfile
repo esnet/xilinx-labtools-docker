@@ -152,7 +152,9 @@ RUN \
     else \
       wget -qO- $DISPENSE_BASE_URL/$VIVADO_LAB_INSTALLER | pigz -dc | tar xa --strip-components=1 -C /vivado-installer ; \
     fi \
-  ) && \
+  )
+
+RUN \
   if [ ! -e ${VIVADO_INSTALLER_CONFIG} ] ; then \
     /vivado-installer/xsetup \
       -e 'Vivado Lab Edition (Standalone)' \
