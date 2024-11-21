@@ -35,9 +35,9 @@ Download the Xilinx Labtools Installer
 --------------------------------------
 
 * Open a web browser to this page: https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vivado-design-tools/2024-2.html
-* Under the `Vivado Lab Solutions - 2024.2` section
-  * Download `Vivado 2024.2: Lab Edition - Linux`
-  * Save the file as exactly: `Vivado_Lab_Lin_2024.2_1113_1001.tar`
+* Under the `Vivado Lab Solutions Update 2 - 2024.2` section
+  * Download `Vivado 2024.2.2: Lab Edition - Linux`
+  * Save the file as exactly: `Vivado_Lab_Lin_2024.2.2_0306_2141.tar`
 * Move the file into the `vivado-installer` directory in this repo
 
 Download the Alveo Smartnic Satellite Controller Update Tool
@@ -69,7 +69,7 @@ $ tree
 ├── entrypoint.sh
 ├── LICENSE.md
 ├── patches
-│   └── vivado-2024.2-postinstall.patch
+│   └── vivado-2024.2.2-postinstall.patch
 ├── README.md
 ├── sc-fw-downloads
 │   ├── loadsc_v2.3.zip   <------------------------------------- put the loadsc zip file here
@@ -77,8 +77,8 @@ $ tree
 │   └── SC_U55_7_1_24.zip    <---------------------------------- put the SC Firmware zip files here
 ├── sc-fw-extra
 └── vivado-installer
-    ├── install_config_lab.2024.2.txt
-    └── Vivado_Lab_Lin_2024.2_1113_1001.tar          <------- put the installer here
+    ├── install_config_lab.2024.2.2.txt
+    └── Vivado_Lab_Lin_2024.2.2_0306_2141.tar           <------- put the installer here
 ```
 
 Building the xilinx-labtools container
