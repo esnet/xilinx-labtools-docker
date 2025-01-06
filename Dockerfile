@@ -72,7 +72,7 @@ RUN \
 COPY sc-fw-extra/ /sc-fw/
 RUN \
   for sc in /sc-fw-downloads/SC_*.zip ; do \
-    unzip -d /sc-fw $sc ; \
+    unzip -j -d /sc-fw $sc ; \
   done
 
 # -- --- ----- ------- ----------- -------------
