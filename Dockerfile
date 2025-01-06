@@ -1,7 +1,7 @@
 # -- --- ----- ------- ----------- -------------
 
 # Set up the Xilinx Debian package archive and download some pre-built packages
-FROM ubuntu:jammy as xilinx
+FROM ubuntu:jammy AS xilinx
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
