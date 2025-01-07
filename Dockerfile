@@ -1,7 +1,7 @@
 # -- --- ----- ------- ----------- -------------
 
 # Set up the Xilinx Debian package archive and download some pre-built packages
-FROM ubuntu:jammy as xilinx
+FROM ubuntu:jammy AS xilinx
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
@@ -69,10 +69,12 @@ RUN \
   done
 
 # Copy in any locally populated extra SC firmware images supplied by the user
+# The "-f" test below ensures that the loop is properly skipped when there are no matching "SC_*.zip" files provided
 COPY sc-fw-extra/ /sc-fw/
 RUN \
   for sc in /sc-fw-downloads/SC_*.zip ; do \
-    unzip -d /sc-fw $sc ; \
+    [ -f "$sc" ] || continue ; \
+    unzip -j -d /sc-fw $sc ; \
   done
 
 # -- --- ----- ------- ----------- -------------

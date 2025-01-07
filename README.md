@@ -54,8 +54,8 @@ Download the latest Satellite Controller Firmware Releases (optional)
 * At the bottom of the page under the `Files` section
   * Download `SC_U280_4_3_31.zip`
     * Save the file as exactly `SC_U280_4_3_31.zip`
-  * Download `SC_U55C_7_1_23.zip`
-    * Save the file as exactly `SC_U55C_7_1_23.zip`
+  * Download `SC_U55C_7_1_24.zip`
+    * Save the file as exactly `SC_U55C_7_1_24.zip`
   * Move the downloaded files into the `sc-fw-downloads` directory in this repo
 
 Verify that you have the downloaded files all in the right places
@@ -74,7 +74,7 @@ $ tree
 ├── sc-fw-downloads
 │   ├── loadsc_v2.3.zip   <------------------------------------- put the loadsc zip file here
 │   ├── SC_U280_4_3_31.zip   <---------------------------------- put the SC Firmware zip files here
-│   └── SC_U55_7_1_23.zip    <---------------------------------- put the SC Firmware zip files here
+│   └── SC_U55_7_1_24.zip    <---------------------------------- put the SC Firmware zip files here
 ├── sc-fw-extra
 └── vivado-installer
     ├── install_config_lab.2023.2.txt
