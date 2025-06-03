@@ -192,6 +192,7 @@ RUN \
     file \
     jq \
     less \
+    libusb-1.0-0 \
     pciutils \
     tree \
     && \
