@@ -19,19 +19,19 @@ build:
   variables:
     # example PUBLISH_TAG: wharf.es.net/ht/xilinx-labtools-docker:18106-g1b221f5c
     PUBLISH_TAG: $HSITE/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_PIPELINE_ID-g$CI_COMMIT_SHORT_SHA
-    SC_FW_BASE_URL: https://dispense.es.net/Linux/xilinx/
+    SC_FW_BASE_URL: https://dispense.es.net/Linux/xilinx
   before_script:
     # Download optional assets from dispense which are not directly available on xilinx.com
-    - wget -q -P sc-fw-extra https://dispense.es.net/Linux/xilinx/sc-fw-u280-4.3.15-e7c874dfed8b39991ece9606f14bcc55.txt
-    - wget -q -P sc-fw-extra https://dispense.es.net/Linux/xilinx/sc-fw-u280-4.3.27-86ad998ebd4a64a737957f4bc8fd9cbc.txt
-    - wget -q -P sc-fw-extra https://dispense.es.net/Linux/xilinx/sc-fw-u280-4.3.31-3df2cd43aeeee780f6bd16547d47a0d4.txt
-    - wget -q -P sc-fw-extra https://dispense.es.net/Linux/xilinx/sc-fw-u55-7.1.17-fb6d693b58a437cc186916fce5fa13bd.txt
-    - wget -q -P sc-fw-extra https://dispense.es.net/Linux/xilinx/sc-fw-u55-7.1.23-53c604b35fd124c316ce1b477ab75689.txt
-    - wget -q -P sc-fw-extra https://dispense.es.net/Linux/xilinx/sc-fw-u55-7.1.24-859d4d5429a47f7d5a14dd8d1969f02d.txt
+    - wget -q -P sc-fw-extra ${SC_FW_BASE_URL}/sc-fw-u280-4.3.15-e7c874dfed8b39991ece9606f14bcc55.txt
+    - wget -q -P sc-fw-extra ${SC_FW_BASE_URL}/sc-fw-u280-4.3.27-86ad998ebd4a64a737957f4bc8fd9cbc.txt
+    - wget -q -P sc-fw-extra ${SC_FW_BASE_URL}/sc-fw-u280-4.3.31-3df2cd43aeeee780f6bd16547d47a0d4.txt
+    - wget -q -P sc-fw-extra ${SC_FW_BASE_URL}/sc-fw-u55-7.1.17-fb6d693b58a437cc186916fce5fa13bd.txt
+    - wget -q -P sc-fw-extra ${SC_FW_BASE_URL}/sc-fw-u55-7.1.23-53c604b35fd124c316ce1b477ab75689.txt
+    - wget -q -P sc-fw-extra ${SC_FW_BASE_URL}/sc-fw-u55-7.1.24-859d4d5429a47f7d5a14dd8d1969f02d.txt
     # Download optional assets from dispense which match the files that external users would download manually
-    - wget -q -P sc-fw-downloads https://dispense.es.net/Linux/xilinx/SC_U280_4_3_31.zip
-    - wget -q -P sc-fw-downloads https://dispense.es.net/Linux/xilinx/SC_U55C_7_1_23.zip
-    - wget -q -P sc-fw-downloads https://dispense.es.net/Linux/xilinx/SC_U55C_7_1_24.zip
+    - wget -q -P sc-fw-downloads ${SC_FW_BASE_URL}/SC_U280_4_3_31.zip
+    - wget -q -P sc-fw-downloads ${SC_FW_BASE_URL}/SC_U55C_7_1_23.zip
+    - wget -q -P sc-fw-downloads ${SC_FW_BASE_URL}/SC_U55C_7_1_24.zip
   script:
     # Auth to external registry
     - docker login -u "$HUSER" -p "$HTOKEN" "$HSITE"
