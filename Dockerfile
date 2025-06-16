@@ -118,7 +118,6 @@ RUN \
     lsb-release \
     net-tools \
     patch \
-    pigz \
     unzip \
     wget \
     && \
@@ -138,9 +137,10 @@ ARG DISPENSE_BASE_URL="https://dispense.es.net/Linux/xilinx"
 
 # Install the Xilinx Lab tools
 # ENV var to help users to find the version of vivado that has been installed in this container
-ENV VIVADO_VERSION=2023.2
+ENV VIVADO_BASE_VERSION=2024.2
+ENV VIVADO_VERSION=${VIVADO_BASE_VERSION}.2
 # Xilinx installer tar file originally from: https://www.xilinx.com/support/download.html
-ARG VIVADO_LAB_INSTALLER="Vivado_Lab_Lin_${VIVADO_VERSION}_1013_2256.tar.gz"
+ARG VIVADO_LAB_INSTALLER="Vivado_Lab_Lin_${VIVADO_VERSION}_0306_2141.tar"
 # Installer config file
 ARG VIVADO_INSTALLER_CONFIG="/vivado-installer/install_config_lab.${VIVADO_VERSION}.txt"
 
@@ -148,11 +148,13 @@ COPY vivado-installer/ /vivado-installer/
 RUN \
   ( \
     if [ -e /vivado-installer/$VIVADO_LAB_INSTALLER ] ; then \
-      pigz -dc /vivado-installer/$VIVADO_LAB_INSTALLER | tar xa --strip-components=1 -C /vivado-installer ; \
+      tar xf /vivado-installer/$VIVADO_LAB_INSTALLER --strip-components=1 -C /vivado-installer ; \
     else \
-      wget -qO- $DISPENSE_BASE_URL/$VIVADO_LAB_INSTALLER | pigz -dc | tar xa --strip-components=1 -C /vivado-installer ; \
+      wget -qO- $DISPENSE_BASE_URL/$VIVADO_LAB_INSTALLER | tar x --strip-components=1 -C /vivado-installer ; \
     fi \
-  ) && \
+  )
+
+RUN \
   if [ ! -e ${VIVADO_INSTALLER_CONFIG} ] ; then \
     /vivado-installer/xsetup \
       -e 'Vivado Lab Edition (Standalone)' \
@@ -191,6 +193,7 @@ RUN \
     file \
     jq \
     less \
+    libusb-1.0-0 \
     pciutils \
     tree \
     && \
