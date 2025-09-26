@@ -1,12 +1,19 @@
 # -- --- ----- ------- ----------- -------------
 
-# Set up the Xilinx Debian package archive and download some pre-built packages
-FROM ubuntu:jammy AS xilinx
+# Set up a base container environment configured to pull from the ESnet public mirror
+FROM ubuntu:jammy AS base
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
 RUN \
   sed -i -re 's|(http://)([^/]+.*)/|\1linux.mirrors.es.net/ubuntu|g' /etc/apt/sources.list
+
+# Set our container localtime to UTC
+RUN \
+  ln -fs /usr/share/zoneinfo/UTC /etc/localtime
+
+# Set up the Xilinx Debian package archive and download some pre-built packages
+FROM base AS xilinx
 
 # Install prereq tools
 RUN \
