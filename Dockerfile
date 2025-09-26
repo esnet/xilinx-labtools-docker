@@ -12,6 +12,19 @@ RUN \
 RUN \
   ln -fs /usr/share/zoneinfo/UTC /etc/localtime
 
+# Set up a locale
+RUN \
+  apt-get update -y && \
+  apt-get upgrade -y && \
+  apt install -y --no-install-recommends \
+    locales \
+  && \
+  apt-get autoclean && \
+  apt-get autoremove && \
+  locale-gen en_US.UTF-8 && \
+  update-locale LANG=en_US.UTF-8 && \
+  rm -rf /var/lib/apt/lists/*
+
 # -- --- ----- ------- ----------- -------------
 
 # Set up the Xilinx Debian package archive and download some pre-built packages
@@ -98,7 +111,6 @@ RUN \
   apt-get install -y --no-install-recommends \
     ca-certificates \
     libtinfo5 \
-    locales \
     lsb-release \
     patch \
     unzip \
@@ -106,8 +118,6 @@ RUN \
     && \
   apt-get autoclean && \
   apt-get autoremove && \
-  locale-gen en_US.UTF-8 && \
-  update-locale LANG=en_US.UTF-8 && \
   rm -rf /var/lib/apt/lists/*
 
 # Set up the base address for where installer binaries are stored within ESnet's private network
