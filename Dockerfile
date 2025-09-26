@@ -12,6 +12,8 @@ RUN \
 RUN \
   ln -fs /usr/share/zoneinfo/UTC /etc/localtime
 
+# -- --- ----- ------- ----------- -------------
+
 # Set up the Xilinx Debian package archive and download some pre-built packages
 FROM base AS xilinx
 
@@ -86,17 +88,6 @@ RUN \
 
 # -- --- ----- ------- ----------- -------------
 
-FROM ubuntu:jammy
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Configure local ubuntu mirror as package source
-RUN \
-  sed -i -re 's|(http://)([^/]+.*)/|\1linux.mirrors.es.net/ubuntu|g' /etc/apt/sources.list
-
-# Set our container localtime to UTC
-RUN \
-  ln -fs /usr/share/zoneinfo/UTC /etc/localtime
-
 # Pull in the downloaded deb files from the xilinx layer
 COPY --from=xilinx /xilinx-debs/ /xilinx-debs/
 
@@ -113,6 +104,8 @@ RUN \
   apt-get autoclean && \
   apt-get autoremove && \
   rm -rf /var/lib/apt/lists/*
+# Install the vivado tools
+FROM base AS xilinx-vivado
 
 # Install packages required for running the vivado installer
 RUN \
