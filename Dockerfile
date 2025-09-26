@@ -88,22 +88,6 @@ RUN \
 
 # -- --- ----- ------- ----------- -------------
 
-# Pull in the downloaded deb files from the xilinx layer
-COPY --from=xilinx /xilinx-debs/ /xilinx-debs/
-
-# Pull in the extracted SC firmware files from the xilinx layer
-COPY --from=xilinx /sc-fw/ /sc-fw/
-
-# Install the xbflash2 package
-RUN \
-  apt-get update -y && \
-  apt-get upgrade -y && \
-  apt-get install -y --no-install-recommends \
-    /xilinx-debs/xrt-xbflash2_*_amd64.deb \
-    && \
-  apt-get autoclean && \
-  apt-get autoremove && \
-  rm -rf /var/lib/apt/lists/*
 # Install the vivado tools
 FROM base AS xilinx-vivado
 
@@ -116,7 +100,6 @@ RUN \
     libtinfo5 \
     locales \
     lsb-release \
-    net-tools \
     patch \
     unzip \
     wget \
@@ -185,7 +168,15 @@ RUN \
     patch -p 1 < /patches/vivado-${VIVADO_VERSION}-postinstall.patch ; \
   fi
 
-# Install misc extra packages that are useful at runtime but not required for installing labtools
+COPY <<EOF /vivado-version.env
+VIVADO_BASE_VERSION=${VIVADO_BASE_VERSION}
+EOF
+
+# -- --- ----- ------- ----------- -------------
+
+FROM base AS runtime
+
+# Install misc extra packages that are useful at runtime
 RUN \
   apt-get update -y && \
   apt-get upgrade -y && \
@@ -194,6 +185,9 @@ RUN \
     jq \
     less \
     libusb-1.0-0 \
+    libtinfo5 \
+    lsb-release \
+    net-tools \
     pciutils \
     tree \
     && \
@@ -201,7 +195,29 @@ RUN \
   apt-get autoremove && \
   rm -rf /var/lib/apt/lists/*
 
+# Pull in the downloaded deb files from the xilinx layer
+COPY --from=xilinx /xilinx-debs/ /xilinx-debs/
+
+# Pull in the extracted SC firmware files from the xilinx layer
+COPY --from=xilinx /sc-fw/ /sc-fw/
+
+# Install the xbflash2 package
+RUN \
+  apt-get update -y && \
+  apt-get upgrade -y && \
+  apt-get install -y --no-install-recommends \
+    /xilinx-debs/xrt-xbflash2_*_amd64.deb \
+    && \
+  apt-get autoclean && \
+  apt-get autoremove && \
+  rm -rf /var/lib/apt/lists/*
+
+# Pull in the installed vivado tools
+# Note: do this late in the dockerfile to allow the rest of this stage to run in parallel with the vivado install
+COPY --from=xilinx-vivado /tools/Xilinx /tools/Xilinx
+
 # Set up the container to pre-source the vivado environment
+COPY --from=xilinx-vivado /vivado-version.env /
 COPY ./entrypoint.sh /entrypoint.sh
 ENTRYPOINT [ "/entrypoint.sh" ]
 
