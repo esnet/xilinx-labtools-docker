@@ -33,7 +33,6 @@ FROM base AS xilinx
 # Install prereq tools
 RUN \
   apt-get update -y && \
-  apt-get upgrade -y && \
   apt install -y --no-install-recommends \
     build-essential \
     ca-certificates \
@@ -107,7 +106,6 @@ FROM base AS xilinx-vivado
 # Install packages required for running the vivado installer
 RUN \
   apt-get update -y && \
-  apt-get upgrade -y && \
   apt-get install -y --no-install-recommends \
     ca-certificates \
     libtinfo5 \
@@ -189,7 +187,6 @@ FROM base AS runtime
 # Install misc extra packages that are useful at runtime
 RUN \
   apt-get update -y && \
-  apt-get upgrade -y && \
   apt-get install -y --no-install-recommends \
     file \
     jq \
@@ -214,7 +211,6 @@ COPY --from=xilinx /sc-fw/ /sc-fw/
 # Install the xbflash2 package
 RUN \
   apt-get update -y && \
-  apt-get upgrade -y && \
   apt-get install -y --no-install-recommends \
     /xilinx-debs/xrt-xbflash2_*_amd64.deb \
     && \
