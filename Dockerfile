@@ -28,7 +28,7 @@ RUN \
 # -- --- ----- ------- ----------- -------------
 
 # Set up the Xilinx Debian package archive and download some pre-built packages
-FROM base AS xilinx
+FROM base AS xilinx-misc
 
 # Install prereq tools
 RUN \
@@ -203,10 +203,10 @@ RUN \
   rm -rf /var/lib/apt/lists/*
 
 # Pull in the downloaded deb files from the xilinx layer
-COPY --from=xilinx /xilinx-debs/ /xilinx-debs/
+COPY --from=xilinx-misc /xilinx-debs/ /xilinx-debs/
 
 # Pull in the extracted SC firmware files from the xilinx layer
-COPY --from=xilinx /sc-fw/ /sc-fw/
+COPY --from=xilinx-misc /sc-fw/ /sc-fw/
 
 # Install the xbflash2 package
 RUN \
