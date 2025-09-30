@@ -1,17 +1,38 @@
 # -- --- ----- ------- ----------- -------------
 
-# Set up the Xilinx Debian package archive and download some pre-built packages
-FROM ubuntu:jammy AS xilinx
+# Set up a base container environment configured to pull from the ESnet public mirror
+FROM ubuntu:jammy AS base
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
 RUN \
   sed -i -re 's|(http://)([^/]+.*)/|\1linux.mirrors.es.net/ubuntu|g' /etc/apt/sources.list
 
-# Install prereq tools
+# Set our container localtime to UTC
+RUN \
+  ln -fs /usr/share/zoneinfo/UTC /etc/localtime
+
+# Set up a locale
 RUN \
   apt-get update -y && \
   apt-get upgrade -y && \
+  apt install -y --no-install-recommends \
+    locales \
+  && \
+  apt-get autoclean && \
+  apt-get autoremove && \
+  locale-gen en_US.UTF-8 && \
+  update-locale LANG=en_US.UTF-8 && \
+  rm -rf /var/lib/apt/lists/*
+
+# -- --- ----- ------- ----------- -------------
+
+# Set up the Xilinx Debian package archive and download some pre-built packages
+FROM base AS xilinx-misc
+
+# Install prereq tools
+RUN \
+  apt-get update -y && \
   apt install -y --no-install-recommends \
     build-essential \
     ca-certificates \
@@ -79,52 +100,22 @@ RUN \
 
 # -- --- ----- ------- ----------- -------------
 
-FROM ubuntu:jammy
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Configure local ubuntu mirror as package source
-RUN \
-  sed -i -re 's|(http://)([^/]+.*)/|\1linux.mirrors.es.net/ubuntu|g' /etc/apt/sources.list
-
-# Set our container localtime to UTC
-RUN \
-  ln -fs /usr/share/zoneinfo/UTC /etc/localtime
-
-# Pull in the downloaded deb files from the xilinx layer
-COPY --from=xilinx /xilinx-debs/ /xilinx-debs/
-
-# Pull in the extracted SC firmware files from the xilinx layer
-COPY --from=xilinx /sc-fw/ /sc-fw/
-
-# Install the xbflash2 package
-RUN \
-  apt-get update -y && \
-  apt-get upgrade -y && \
-  apt-get install -y --no-install-recommends \
-    /xilinx-debs/xrt-xbflash2_*_amd64.deb \
-    && \
-  apt-get autoclean && \
-  apt-get autoremove && \
-  rm -rf /var/lib/apt/lists/*
+# Install the vivado tools
+FROM base AS xilinx-vivado
 
 # Install packages required for running the vivado installer
 RUN \
   apt-get update -y && \
-  apt-get upgrade -y && \
   apt-get install -y --no-install-recommends \
     ca-certificates \
     libtinfo5 \
-    locales \
     lsb-release \
-    net-tools \
     patch \
     unzip \
     wget \
     && \
   apt-get autoclean && \
   apt-get autoremove && \
-  locale-gen en_US.UTF-8 && \
-  update-locale LANG=en_US.UTF-8 && \
   rm -rf /var/lib/apt/lists/*
 
 # Set up the base address for where installer binaries are stored within ESnet's private network
@@ -185,15 +176,25 @@ RUN \
     patch -p 1 < /patches/vivado-${VIVADO_VERSION}-postinstall.patch ; \
   fi
 
-# Install misc extra packages that are useful at runtime but not required for installing labtools
+COPY <<EOF /vivado-version.env
+VIVADO_BASE_VERSION=${VIVADO_BASE_VERSION}
+EOF
+
+# -- --- ----- ------- ----------- -------------
+
+FROM base AS runtime
+
+# Install misc extra packages that are useful at runtime
 RUN \
   apt-get update -y && \
-  apt-get upgrade -y && \
   apt-get install -y --no-install-recommends \
     file \
     jq \
     less \
     libusb-1.0-0 \
+    libtinfo5 \
+    lsb-release \
+    net-tools \
     pciutils \
     tree \
     && \
@@ -201,7 +202,28 @@ RUN \
   apt-get autoremove && \
   rm -rf /var/lib/apt/lists/*
 
+# Pull in the downloaded deb files from the xilinx layer
+COPY --from=xilinx-misc /xilinx-debs/ /xilinx-debs/
+
+# Pull in the extracted SC firmware files from the xilinx layer
+COPY --from=xilinx-misc /sc-fw/ /sc-fw/
+
+# Install the xbflash2 package
+RUN \
+  apt-get update -y && \
+  apt-get install -y --no-install-recommends \
+    /xilinx-debs/xrt-xbflash2_*_amd64.deb \
+    && \
+  apt-get autoclean && \
+  apt-get autoremove && \
+  rm -rf /var/lib/apt/lists/*
+
+# Pull in the installed vivado tools
+# Note: do this late in the dockerfile to allow the rest of this stage to run in parallel with the vivado install
+COPY --from=xilinx-vivado /tools/Xilinx /tools/Xilinx
+
 # Set up the container to pre-source the vivado environment
+COPY --from=xilinx-vivado /vivado-version.env /
 COPY ./entrypoint.sh /entrypoint.sh
 ENTRYPOINT [ "/entrypoint.sh" ]
 
