@@ -197,6 +197,7 @@ RUN \
     net-tools \
     pciutils \
     tree \
+    udev \
     && \
   apt-get autoclean && \
   apt-get autoremove && \
