@@ -137,7 +137,8 @@ ARG DISPENSE_BASE_URL="https://dispense.es.net/Linux/xilinx"
 
 # Install the Xilinx Lab tools
 # ENV var to help users to find the version of vivado that has been installed in this container
-ENV VIVADO_VERSION=2023.2
+ENV VIVADO_BASE_VERSION=2023.2
+ENV VIVADO_VERSION=${VIVADO_BASE_VERSION}
 # Xilinx installer tar file originally from: https://www.xilinx.com/support/download.html
 ARG VIVADO_LAB_INSTALLER="Vivado_Lab_Lin_${VIVADO_VERSION}_1013_2256.tar.gz"
 # Installer config file
