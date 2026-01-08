@@ -52,8 +52,8 @@ build:
       dotenv:
         build.env
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-    - if: '$CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "vivado-2023.2"'
+    - if: '$CI_COMMIT_BRANCH != "vivado-2023.2"'
       variables:
         TAG_SUFFIX: -dev
 
