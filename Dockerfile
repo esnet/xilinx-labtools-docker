@@ -191,8 +191,11 @@ RUN \
     file \
     jq \
     less \
+    libpixman-1-0 \
+    libpng16-16 \
     libusb-1.0-0 \
     libtinfo5 \
+    libx11-6 \
     lsb-release \
     net-tools \
     pciutils \
