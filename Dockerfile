@@ -1,7 +1,7 @@
 # -- --- ----- ------- ----------- -------------
 
 # Set up a base container environment configured to pull from the ESnet public mirror
-FROM ubuntu:jammy AS base
+FROM ubuntu:noble AS base
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Configure local ubuntu mirror as package source
@@ -44,7 +44,9 @@ RUN \
 # Import the Xilinx public key
 RUN wget -qO - https://www.xilinx.com/support/download/2020-2/xilinx-master-signing-key.asc | apt-key add -
 # Add the Xilinx debian archive
-RUN echo "deb https://packages.xilinx.com/artifactory/debian-packages $(lsb_release -cs) main" | tee -a /etc/apt/sources.list.d/xlnx.list
+#ARG XILINX_DEB_DIST="$(lsb_release -cs)"
+ARG XILINX_DEB_DIST="jammy"
+RUN echo "deb https://packages.xilinx.com/artifactory/debian-packages ${XILINX_DEB_DIST} main" | tee -a /etc/apt/sources.list.d/xlnx.list
 RUN apt update
 
 # Download the latest versions of the Satellite Controller Firmware (SC FW) packages and xbflash2 tool from the Xilinx archive
@@ -108,7 +110,7 @@ RUN \
   apt-get update -y && \
   apt-get install -y --no-install-recommends \
     ca-certificates \
-    libtinfo5 \
+    libtinfo6 \
     lsb-release \
     patch \
     unzip \
@@ -192,7 +194,7 @@ RUN \
     jq \
     less \
     libusb-1.0-0 \
-    libtinfo5 \
+    libtinfo6 \
     lsb-release \
     net-tools \
     pciutils \
@@ -202,6 +204,12 @@ RUN \
   apt-get autoclean && \
   apt-get autoremove && \
   rm -rf /var/lib/apt/lists/*
+
+# Create a soname link to the terminal info library needed by vivado_lab.
+RUN \
+  if ! [ -e /usr/lib/x86_64-linux-gnu/libtinfo.so.5 ] ; then \
+    ln -s libtinfo.so.6 /usr/lib/x86_64-linux-gnu/libtinfo.so.5 ; \
+  fi
 
 # Pull in the downloaded deb files from the xilinx layer
 COPY --from=xilinx-misc /xilinx-debs/ /xilinx-debs/
