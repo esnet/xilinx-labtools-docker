@@ -1,12 +1,14 @@
 # -- --- ----- ------- ----------- -------------
 
 # Set up a base container environment configured to pull from the ESnet public mirror
-FROM ubuntu:jammy AS base
+FROM ubuntu:noble AS base
 ENV DEBIAN_FRONTEND=noninteractive
+
+SHELL ["bash", "-c"]
 
 # Configure local ubuntu mirror as package source
 RUN \
-  sed -i -re 's|(http://)([^/]+.*)/|\1linux.mirrors.es.net/ubuntu|g' /etc/apt/sources.list
+  sed -i -re 's|(http://)([^/]+.*)/|\1linux.mirrors.es.net/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
 
 # Set our container localtime to UTC
 RUN \
@@ -44,7 +46,9 @@ RUN \
 # Import the Xilinx public key
 RUN wget -qO - https://www.xilinx.com/support/download/2020-2/xilinx-master-signing-key.asc | apt-key add -
 # Add the Xilinx debian archive
-RUN echo "deb https://packages.xilinx.com/artifactory/debian-packages $(lsb_release -cs) main" | tee -a /etc/apt/sources.list.d/xlnx.list
+#ARG XILINX_DEB_DIST="$(lsb_release -cs)"
+ARG XILINX_DEB_DIST="jammy"
+RUN echo "deb https://packages.xilinx.com/artifactory/debian-packages ${XILINX_DEB_DIST} main" | tee -a /etc/apt/sources.list.d/xlnx.list
 RUN apt update
 
 # Download the latest versions of the Satellite Controller Firmware (SC FW) packages and xbflash2 tool from the Xilinx archive
@@ -108,7 +112,6 @@ RUN \
   apt-get update -y && \
   apt-get install -y --no-install-recommends \
     ca-certificates \
-    libtinfo5 \
     lsb-release \
     patch \
     unzip \
@@ -194,7 +197,6 @@ RUN \
     libpixman-1-0 \
     libpng16-16 \
     libusb-1.0-0 \
-    libtinfo5 \
     libx11-6 \
     lsb-release \
     net-tools \
