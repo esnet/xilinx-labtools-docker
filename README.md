@@ -34,7 +34,8 @@ at smartnic@es.net.
 Download the Xilinx Labtools Installer
 --------------------------------------
 
-* Open a web browser to this page: https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vivado-design-tools/2023-2.html
+* Open a web browser to this page: https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vivado-design-tools/archive.html
+* Expand the `2023.2` item in the `2023` section.
 * Under the `Vivado Lab Solutions - 2023.2` section
   * Download `Vivado 2023.2: Lab Edition - Linux`
   * Save the file as exactly: `Vivado_Lab_Lin_2023.2_1013_2256.tar.gz`
